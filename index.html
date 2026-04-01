@@ -1,0 +1,2600 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GUARDIANES DEL BOSQUE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #1a2f1a; /* Verde bosque oscuro */
+            font-family: 'Roboto', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .room-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #2d5a2d 0%, #1d3b1d 100%); /* Verde selva */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        /* LOGO EN MENÚ PRINCIPAL */
+        .menu-logo {
+            width: 280px;
+            height: 140px;
+            margin-bottom: 25px;
+            background-image: url('assets/logo-inicio.png'); /* Reemplazar con logo de bosque */
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            filter: drop-shadow(0 0 15px #8bc34a); /* Sombra verde */
+        }
+
+        /* LOGO EN ARENA */
+        .arena-logo {
+            position: absolute;
+            top: 20px;
+            left: 220px;
+            width: 120px;
+            height: 120px;
+            z-index: 5;
+            pointer-events: none;
+            background-image: url('assets/logo-arena.png'); /* Reemplazar con logo de bosque */
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 1;
+            filter: drop-shadow(0 0 10px #ff9800); /* Sombra naranja */
+        }
+
+        /* BOTÓN DE SONIDO FLOTANTE */
+        .sound-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #ff9800; /* Naranja */
+            border: 3px solid #8bc34a; /* Verde claro */
+            color: #1d3b1d;
+            font-size: 1.8rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 9999;
+            box-shadow: 0 0 20px #8bc34a;
+            transition: all 0.3s;
+            animation: pulse 1s infinite;
+        }
+
+        .sound-toggle:active {
+            transform: scale(0.9);
+        }
+
+        .sound-toggle.muted {
+            background: #5d4037; /* Marrón */
+            border-color: #d32f2f;
+            box-shadow: 0 0 20px #d32f2f;
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .sound-message {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            background: rgba(0,0,0,0.8);
+            border: 2px solid #8bc34a;
+            border-radius: 10px;
+            padding: 8px 12px;
+            color: #8bc34a;
+            font-size: 0.8rem;
+            z-index: 9998;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .room-title {
+            font-size: 2.5rem;
+            color: #ff9800; /* Naranja */
+            text-shadow: 0 0 20px #8bc34a, 2px 2px 0 #5d4037; /* Verde y marrón */
+            margin-bottom: 20px;
+            text-align: center;
+            animation: glitchText 3s infinite;
+        }
+
+        .room-subtitle {
+            color: #a5d6a5; /* Verde claro */
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+            text-align: center;
+            letter-spacing: 3px;
+        }
+
+        @keyframes glitchText {
+            0%, 100% { transform: skew(0deg, 0deg); opacity: 1; text-shadow: 2px 2px 0 #5d4037; }
+            95% { transform: skew(2deg, 1deg); text-shadow: -2px -2px 0 #8bc34a; }
+            96% { transform: skew(-2px, -1px); text-shadow: 3px 0 0 #5d4037; }
+            97% { transform: skew(0deg, 0deg); text-shadow: -3px 0 0 #8bc34a; }
+        }
+
+        .role-buttons {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .role-btn {
+            padding: 30px 50px;
+            border-radius: 40px;
+            border: none;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            min-width: 280px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .role-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(transparent 50%, rgba(255,255,255,0.1) 50%);
+            transform: rotate(45deg);
+            animation: glitchOverlay 2s infinite;
+        }
+
+        @keyframes glitchOverlay {
+            0%, 100% { transform: translateX(-100%) rotate(45deg); }
+            10%, 90% { transform: translateX(100%) rotate(45deg); }
+        }
+
+        .role-btn:hover {
+            transform: scale(1.05);
+            filter: brightness(1.2);
+        }
+
+        .arena-btn {
+            background: #2e7d32; /* Verde oscuro */
+            color: #ffb74d; /* Naranja claro */
+            border: 4px solid #ff9800; /* Naranja */
+        }
+
+        .controller-btn {
+            background: #ff9800; /* Naranja */
+            color: #1d3b1d; /* Verde oscuro */
+            border: 4px solid #2e7d32; /* Verde */
+        }
+
+        #connectionInfo {
+            color: #a5d6a5;
+            font-size: 1.2rem;
+            margin-top: 30px;
+            text-align: center;
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .presentation-mode {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100vh;
+            background: #1a2f1a;
+            position: relative;
+        }
+
+        .glitch-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 3;
+            mix-blend-mode: screen;
+            animation: glitchStatic 0.2s infinite;
+            opacity: 0;
+            transition: opacity 0.1s;
+        }
+
+        @keyframes glitchStatic {
+            0% { background: rgba(255,255,255,0.02); transform: translate(0, 0); }
+            20% { background: rgba(255,152,0,0.02); transform: translate(-2px, 1px); } /* Naranja */
+            40% { background: rgba(139,195,74,0.02); transform: translate(2px, -1px); } /* Verde */
+            60% { background: rgba(93,64,55,0.02); transform: translate(-1px, 2px); } /* Marrón */
+            80% { background: rgba(255,87,34,0.02); transform: translate(1px, -2px); } /* Naranja oscuro */
+            100% { background: rgba(255,255,255,0.02); transform: translate(0, 0); }
+        }
+
+        #gameCanvas {
+            display: block;
+            width: min(90vw, 90vh);
+            aspect-ratio: 1/1;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            background: #2b4b2b; /* Verde más claro para el suelo */
+            border: 4px solid #8bc34a; /* Verde claro */
+            border-radius: 24px;
+            box-shadow: 0 0 30px #8bc34a, 0 0 60px #ff9800; /* Verde y naranja */
+            position: relative;
+            z-index: 2;
+        }
+
+        .score-board {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(26, 47, 26, 0.9); /* Verde oscuro transparente */
+            border: 2px solid #ff9800; /* Naranja */
+            border-radius: 20px;
+            padding: 10px 20px;
+            color: #ffb74d; /* Naranja claro */
+            font-size: 1.2rem;
+            z-index: 10;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 0 20px #ff9800;
+        }
+
+        .boss-alert {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ff5722; /* Naranja quemado */
+            font-size: 3rem;
+            font-weight: bold;
+            text-shadow: 0 0 30px #ff5722, 0 0 60px #8bc34a;
+            z-index: 20;
+            animation: bossAlert 2s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes bossAlert {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); }
+        }
+
+        .game-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            color: #ff9800;
+            font-size: 3rem;
+            text-shadow: 0 0 20px #ff9800;
+            backdrop-filter: blur(5px);
+        }
+        .game-overlay button {
+            margin-top: 30px;
+            padding: 20px 40px;
+            font-size: 2rem;
+            background: #ff9800;
+            border: none;
+            border-radius: 60px;
+            color: #1d3b1d;
+            font-weight: bold;
+            cursor: pointer;
+            border: 4px solid #8bc34a;
+        }
+
+        /* =========================================== */
+        /* GAMEPAD MODE - ESTILO SELVÁTICO */
+        /* =========================================== */
+        .gamepad-mode {
+            display: none;
+            width: 100%;
+            max-width: 420px;
+            height: 100vh;
+            background: #2b4b2b; /* Verde bosque */
+            flex-direction: column;
+            padding: 16px 16px 20px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .gamepad-glitch {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0px, rgba(139,195,74,0.03) 2px, transparent 3px);
+            animation: scanline 4s linear infinite;
+        }
+
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+
+        .gamepad-header {
+            text-align: center;
+            margin-bottom: 12px;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .gamepad-title {
+            color: #ff9800; /* Naranja */
+            font-size: 1.3rem;
+            margin-bottom: 4px;
+            text-shadow: 0 0 10px #8bc34a, 1px 1px 0 #5d4037;
+        }
+
+        .player-chip {
+            background: #1d3b1d;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            border-radius: 40px;
+            border: 2px solid #ff9800;
+            position: relative;
+            margin-bottom: 8px;
+        }
+
+        .chip-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #ff9800;
+            box-shadow: 0 0 15px #ff9800;
+        }
+
+        .name-input-container {
+            margin: 8px 0 12px 0;
+            text-align: center;
+            background: rgba(139,195,74,0.15); /* Verde claro */
+            padding: 18px 12px;
+            border-radius: 30px;
+            border: 3px solid #ff9800;
+            box-shadow: 0 0 30px rgba(255,152,0,0.3);
+            flex-shrink: 0;
+        }
+
+        .name-label {
+            color: #ff9800;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-weight: bold;
+            text-shadow: 0 0 10px #ff9800;
+        }
+
+        .name-input {
+            background: #1d3b1d;
+            border: 3px solid #ff9800;
+            border-radius: 50px;
+            padding: 14px 20px;
+            color: #ffb74d;
+            font-size: 1.4rem;
+            text-align: center;
+            width: 95%;
+            max-width: 280px;
+            outline: none;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+        }
+
+        .name-input::placeholder {
+            color: #ff980088;
+            font-size: 1.1rem;
+        }
+
+        .name-input:focus {
+            box-shadow: 0 0 40px #ff9800;
+            background: #2b4b2b;
+            transform: scale(1.02);
+        }
+
+        .name-confirm-btn {
+            background: #ff9800;
+            border: none;
+            border-radius: 40px;
+            padding: 12px 24px;
+            color: #1d3b1d;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            border: 2px solid #8bc34a;
+            box-shadow: 0 0 20px #ff9800;
+            transition: all 0.2s;
+            width: 80%;
+            max-width: 220px;
+            letter-spacing: 2px;
+        }
+
+        .name-confirm-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 0 40px #ff9800;
+        }
+
+        .stats-panel {
+            background: #1d3b1d;
+            border-radius: 18px;
+            padding: 12px 8px;
+            margin: 8px 0;
+            display: flex;
+            justify-content: space-around;
+            border: 2px solid #ff9800;
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .stats-panel::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent 30%, rgba(139,195,74,0.1) 50%, transparent 70%);
+            animation: glitchShine 3s infinite;
+        }
+
+        @keyframes glitchShine {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+
+        .stat-item {
+            text-align: center;
+            color: #ffb74d;
+            position: relative;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            color: #ff9800;
+            font-weight: bold;
+            text-shadow: 0 0 10px #ff9800;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: #a5d6a5;
+        }
+
+        .health-material {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin: 8px 0;
+            flex-shrink: 0;
+        }
+
+        .health-dot {
+            width: 22px;
+            height: 22px;
+            border-radius: 11px;
+            background: #5d4037; /* Marrón */
+            transition: all 0.3s;
+        }
+
+        .health-dot.active {
+            background: #ff9800; /* Naranja */
+            box-shadow: 0 0 15px #ff9800;
+            animation: pulse 0.5s infinite;
+        }
+
+        #powerupIndicator {
+            background: #1d3b1d;
+            padding: 8px 12px;
+            border-radius: 18px;
+            margin: 6px 0 4px 0;
+            border: 2px solid #ff9800;
+            position: relative;
+            min-height: 58px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        #powerupName {
+            color: #ff9800;
+            font-weight: bold;
+            margin-bottom: 4px;
+            text-align: center;
+            animation: glitchText 2s infinite;
+            font-size: 1rem;
+        }
+
+        .powerup-timer {
+            width: 100%;
+            height: 4px;
+            background: #5d4037;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .powerup-timer-fill {
+            height: 100%;
+            background: #8bc34a; /* Verde */
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.1s;
+            box-shadow: 0 0 10px #8bc34a;
+            position: relative;
+        }
+
+        .powerup-timer-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shine 1s linear infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Indicador de regeneración de árbol */
+        #regenIndicator {
+            background: #1d3b1d;
+            padding: 8px 12px;
+            border-radius: 18px;
+            margin: 6px 0 4px 0;
+            border: 2px solid #8bc34a;
+            position: relative;
+            min-height: 58px;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        #regenMessage {
+            color: #8bc34a;
+            font-weight: bold;
+            margin-bottom: 4px;
+            text-align: center;
+            font-size: 1rem;
+        }
+        .regen-timer {
+            width: 100%;
+            height: 8px;
+            background: #5d4037;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .regen-timer-fill {
+            height: 100%;
+            background: #ff9800;
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.1s linear;
+            box-shadow: 0 0 10px #ff9800;
+        }
+
+        /* Indicador de "Fuera de Juego" (Respawn) */
+        #respawnIndicator {
+            background: #1d3b1d;
+            padding: 12px 12px;
+            border-radius: 18px;
+            margin: 6px 0 4px 0;
+            border: 2px solid #d32f2f;
+            position: relative;
+            min-height: 70px;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+            box-shadow: 0 0 15px #d32f2f;
+        }
+        #respawnMessage {
+            color: #ff8a80;
+            font-weight: bold;
+            margin-bottom: 6px;
+            text-align: center;
+            font-size: 1.1rem;
+            text-shadow: 0 0 8px #d32f2f;
+        }
+        .respawn-timer {
+            width: 80%;
+            height: 8px;
+            background: #5d4037;
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid #ff8a80;
+        }
+        .respawn-timer-fill {
+            height: 100%;
+            background: #d32f2f;
+            border-radius: 4px;
+            width: 100%;
+            transition: width 0.1s linear;
+            box-shadow: 0 0 10px #d32f2f;
+        }
+
+        .joystick-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            gap: 12px;
+            margin: 8px 0 0 0;
+            min-height: 280px;
+        }
+
+        .joystick-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .md-joystick {
+            width: 160px;
+            height: 160px;
+            background: #1d3b1d;
+            border-radius: 999px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            touch-action: none;
+            border: 3px solid #5d4037;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        .md-joystick::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            border-radius: 999px;
+            border: 2px solid transparent;
+            background: linear-gradient(45deg, #8bc34a, #ff9800) border-box;
+            -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+            animation: rotate 3s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .md-joystick-thumb {
+            width: 70px;
+            height: 70px;
+            background: #ff9800;
+            border-radius: 999px;
+            transition: transform 0.05s ease;
+            touch-action: none;
+            border: 3px solid #8bc34a;
+            box-shadow: 0 0 20px #ff9800;
+            position: relative;
+            z-index: 2;
+        }
+
+        .shoot-button-container {
+            display: flex;
+            justify-content: center;
+        }
+
+        .md-button-shoot {
+            background: #ff9800;
+            border: none;
+            border-radius: 60px;
+            padding: 20px 0;
+            color: #1d3b1d;
+            font-size: 2.2rem;
+            touch-action: manipulation;
+            position: relative;
+            border: 4px solid #8bc34a;
+            box-shadow: 0 8px 0 #b86e00; /* Sombra naranja oscura */
+            transition: all 0.1s;
+            overflow: hidden;
+            width: 100%;
+            max-width: 260px;
+            letter-spacing: 3px;
+            font-weight: bold;
+            margin: 0 auto;
+        }
+
+        .md-button-shoot::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(transparent 50%, rgba(255,255,255,0.1) 50%);
+            transform: rotate(45deg);
+            animation: buttonGlitch 3s infinite;
+        }
+
+        @keyframes buttonGlitch {
+            0%, 100% { transform: translateX(-100%) rotate(45deg); }
+            50% { transform: translateX(100%) rotate(45deg); }
+        }
+
+        .md-button-shoot:active {
+            transform: translateY(4px);
+            box-shadow: 0 4px 0 #b86e00;
+        }
+
+        .powerup-indicator {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 22px;
+            height: 22px;
+            border-radius: 12px;
+            background: #8bc34a;
+            box-shadow: 0 0 15px #8bc34a;
+            border: 3px solid #ff9800;
+            animation: glitchPulse 0.5s infinite;
+        }
+
+        @keyframes glitchPulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.8; filter: hue-rotate(90deg); }
+        }
+
+        .connection-status {
+            background: #1d3b1d;
+            border-radius: 24px;
+            padding: 10px;
+            text-align: center;
+            color: #a5d6a5;
+            border: 1px solid #ff9800;
+            margin-top: 10px;
+            position: relative;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .waiting-message {
+            color: #ffb74d;
+            font-size: 1.3rem;
+            margin: 15px 0;
+            text-align: center;
+            text-shadow: 0 0 10px #ff9800;
+            animation: glitchText 2s infinite;
+        }
+
+        .powerup-badge {
+            display: inline-block;
+            background: #ff9800;
+            color: #1d3b1d;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin: 2px;
+            border: 1px solid #8bc34a;
+            font-weight: bold;
+        }
+    </style>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+</head>
+<body>
+    <div class="sound-toggle" id="soundToggle" onclick="toggleSound()">🔊</div>
+    <div class="sound-message" id="soundMessage">🌿 Toca para activar sonido</div>
+
+    <div class="room-screen" id="roomScreen">
+        <div class="menu-logo"></div>
+        <div class="room-title">🌳 GUARDIANES DEL BOSQUE 🌳</div>
+        <div class="room-subtitle">¡Protege la naturaleza de los taladores!</div>
+        <div class="role-buttons">
+            <button class="role-btn arena-btn" onclick="startAsArena()">🌲 EL BOSQUE (PC)</button>
+            <button class="role-btn controller-btn" onclick="startAsController()">🦊 SER GUARDIÁN</button>
+        </div>
+        <div id="connectionInfo">Conectando al claro del bosque...</div>
+    </div>
+
+    <!-- PANTALLA DE GAME OVER -->
+    <div id="gameOverlay" class="game-overlay" style="display: none;">
+        <div>🌳 BOSQUE DESTRUIDO 🌳</div>
+        <button onclick="location.reload()">VOLVER AL INICIO</button>
+    </div>
+
+    <div class="presentation-mode" id="arenaView">
+        <div class="glitch-overlay" id="glitchOverlay"></div>
+        <div class="arena-logo"></div>
+        <div class="score-board" id="scoreBoard">
+            <div>Salvaje: <span id="totalScore">0</span></div>
+            <div>Raíces: <span id="totalPowerups">0</span></div>
+            <div>Árboles: <span id="treesStanding">10/10</span></div>
+            <div>Talador: <span id="bossStatus">🟢</span></div>
+        </div>
+        <canvas id="gameCanvas" width="800" height="800"></canvas>
+    </div>
+
+    <div class="gamepad-mode" id="gamepadView">
+        <div class="gamepad-glitch"></div>
+        <div class="gamepad-header">
+            <div class="gamepad-title">🦊 GUARDIANES 🦊</div>
+            <div class="player-chip">
+                <div class="chip-avatar" id="playerColor"></div>
+                <span id="playerIdText">CONECTANDO...</span>
+            </div>
+        </div>
+
+        <div class="name-input-container" id="nameInputContainer">
+            <div class="name-label">🌿 NOMBRE DEL GUARDIÁN 🌿</div>
+            <input type="text" class="name-input" id="playerNameInput" placeholder="VULPES" maxlength="12" value="VULPES" autofocus>
+            <button class="name-confirm-btn" id="confirmNameBtn">✅ PROTEGER</button>
+        </div>
+
+        <div class="stats-panel">
+            <div class="stat-item">
+                <div class="stat-value" id="playerScore">0</div>
+                <div class="stat-label">SALVAJE</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="playerLevel">1</div>
+                <div class="stat-label">ESPÍRITU</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="playerKills">0</div>
+                <div class="stat-label">TALADORES</div>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: center; align-items: center; gap: 5px; margin: 4px 0; flex-shrink: 0;">
+            <span style="color: #ff9800; font-size: 1.2rem;">❤️</span>
+            <span id="playerLives" style="color: #ffb74d; font-size: 1.5rem; font-weight: bold; text-shadow: 0 0 10px #ff9800;">10</span>
+        </div>
+
+        <div class="health-material" id="healthBars">
+            <div class="health-dot"></div>
+            <div class="health-dot"></div>
+            <div class="health-dot"></div>
+            <div class="health-dot"></div>
+            <div class="health-dot"></div>
+        </div>
+
+        <div id="powerupIndicator">
+            <div id="powerupName" style="display: none;"></div>
+            <div class="powerup-timer">
+                <div class="powerup-timer-fill" id="powerupTimer" style="width: 0%;"></div>
+            </div>
+        </div>
+
+        <!-- NUEVO: Indicador de Regeneración de Árbol -->
+        <div id="regenIndicator">
+            <div id="regenMessage">🌱 REGENERANDO...</div>
+            <div class="regen-timer">
+                <div class="regen-timer-fill" id="regenTimerFill" style="width: 0%;"></div>
+            </div>
+        </div>
+
+        <div id="respawnIndicator">
+            <div id="respawnMessage">💀 FUERA DE COMBATE...</div>
+            <div class="respawn-timer">
+                <div class="respawn-timer-fill" id="respawnTimerFill" style="width: 100%;"></div>
+            </div>
+        </div>
+
+        <div class="waiting-message" id="waitingMessage">
+            ESPERANDO AL BOSQUE<br>
+            <small style="font-size: 1rem;">🌿 Siente la llamada de la naturaleza 🌿</small>
+        </div>
+
+        <div id="controlsContainer" style="display: none;" class="joystick-section">
+            <div class="joystick-container">
+                <div class="md-joystick" id="joystickBase">
+                    <div class="md-joystick-thumb" id="joystickThumb"></div>
+                </div>
+            </div>
+            
+            <div class="shoot-button-container">
+                <button class="md-button-shoot" id="actionShoot">
+                    🐾 DEFENDER
+                    <div class="powerup-indicator" id="rapidIndicator" style="display: none; background: #8bc34a;"></div>
+                    <div class="powerup-indicator" id="bombIndicator" style="display: none; background: #ff5722; right: 40px;"></div>
+                    <div class="powerup-indicator" id="circleIndicator" style="display: none; background: #ff9800; right: 75px;"></div>
+                </button>
+            </div>
+            
+            <div style="display: flex; justify-content: center; gap: 10px; margin-top: 8px; flex-wrap: wrap;">
+                <span class="powerup-badge" id="shieldActive" style="display: none;">🛡️ CORTEZA</span>
+            </div>
+        </div>
+
+        <div class="connection-status" id="connectionStatus">
+            🌿 CONECTADO AL BOSQUE 🌿
+        </div>
+    </div>
+
+    <script>
+        // ===========================================
+        // SISTEMA DE SONIDOS 8-BIT CON DESBLOQUEO
+        // ===========================================
+        let audioCtx = null;
+        let soundEnabled = false;
+        let soundUnlocked = false;
+
+        const soundToggle = document.getElementById('soundToggle');
+        const soundMessage = document.getElementById('soundMessage');
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                console.log('🎵 AudioContext creado');
+            }
+        }
+
+        function unlockAudio() {
+            if (!audioCtx) {
+                initAudio();
+            }
+            
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume().then(() => {
+                    console.log('🎵 Audio desbloqueado por interacción');
+                    soundUnlocked = true;
+                    if (soundEnabled) {
+                        soundToggle.innerHTML = '🔊';
+                        soundToggle.classList.remove('muted');
+                        soundMessage.style.display = 'none';
+                    }
+                    playTestSound();
+                });
+            } else if (audioCtx && audioCtx.state === 'running') {
+                soundUnlocked = true;
+                if (soundEnabled) {
+                    soundToggle.innerHTML = '🔊';
+                    soundToggle.classList.remove('muted');
+                    soundMessage.style.display = 'none';
+                }
+            }
+        }
+
+        function playTestSound() {
+            if (!audioCtx || !soundEnabled || !soundUnlocked) return;
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(440, audioCtx.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1);
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.15);
+        }
+
+        window.toggleSound = function() {
+            initAudio();
+            soundEnabled = !soundEnabled;
+            
+            if (soundEnabled) {
+                soundToggle.innerHTML = '🔊';
+                soundToggle.classList.remove('muted');
+                soundMessage.innerHTML = '🌿 Sonido del bosque activado';
+                setTimeout(() => {
+                    soundMessage.style.display = 'none';
+                }, 2000);
+                unlockAudio();
+            } else {
+                soundToggle.innerHTML = '🔇';
+                soundToggle.classList.add('muted');
+                soundMessage.innerHTML = '🔇 Sonido desactivado';
+                soundMessage.style.display = 'block';
+            }
+        };
+
+        document.body.addEventListener('touchstart', function() {
+            if (!soundUnlocked && soundEnabled) {
+                unlockAudio();
+            }
+        });
+        document.body.addEventListener('click', function() {
+            if (!soundUnlocked && soundEnabled) {
+                unlockAudio();
+            }
+        });
+
+        function playShootSound() {
+            if (!audioCtx || !soundEnabled || !soundUnlocked) return;
+            try {
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                oscillator.type = 'triangle';
+                oscillator.frequency.setValueAtTime(440, audioCtx.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(220, audioCtx.currentTime + 0.1);
+                gainNode.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.15);
+            } catch (e) { console.log('Error:', e); }
+        }
+
+        function playHitSound() {
+            if (!audioCtx || !soundEnabled || !soundUnlocked) return;
+            try {
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                oscillator.type = 'sawtooth';
+                oscillator.frequency.setValueAtTime(180, audioCtx.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.1);
+                gainNode.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.1);
+            } catch (e) { console.log('Error:', e); }
+        }
+
+        function playBossSound() {
+            if (!audioCtx || !soundEnabled || !soundUnlocked) return;
+            try {
+                const notes = [220, 277, 330];
+                notes.forEach((freq, index) => {
+                    const oscillator = audioCtx.createOscillator();
+                    const gainNode = audioCtx.createGain();
+                    oscillator.type = 'square';
+                    oscillator.frequency.value = freq;
+                    gainNode.gain.setValueAtTime(0.08, audioCtx.currentTime + index * 0.05);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + index * 0.05 + 0.3);
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioCtx.destination);
+                    oscillator.start(audioCtx.currentTime + index * 0.05);
+                    oscillator.stop(audioCtx.currentTime + index * 0.05 + 0.3);
+                });
+            } catch (e) { console.log('Error:', e); }
+        }
+
+        function playPowerUpSound() {
+            if (!audioCtx || !soundEnabled || !soundUnlocked) return;
+            try {
+                const now = audioCtx.currentTime;
+                const notes = [262, 330, 392, 523];
+                notes.forEach((freq, index) => {
+                    const oscillator = audioCtx.createOscillator();
+                    const gainNode = audioCtx.createGain();
+                    oscillator.type = 'triangle';
+                    oscillator.frequency.value = freq;
+                    gainNode.gain.setValueAtTime(0.08, now + index * 0.05);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, now + index * 0.05 + 0.1);
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioCtx.destination);
+                    oscillator.start(now + index * 0.05);
+                    oscillator.stop(now + index * 0.05 + 0.1);
+                });
+            } catch (e) { console.log('Error:', e); }
+        }
+
+        function playTreeCutSound() {
+            if (!audioCtx || !soundEnabled || !soundUnlocked) return;
+            try {
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                oscillator.type = 'sawtooth';
+                oscillator.frequency.setValueAtTime(100, audioCtx.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.2);
+                gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.2);
+            } catch (e) { console.log('Error:', e); }
+        }
+
+        function playTreeRegenSound() {
+            if (!audioCtx || !soundEnabled || !soundUnlocked) return;
+            try {
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(300, audioCtx.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.2);
+                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.2);
+            } catch (e) { console.log('Error:', e); }
+        }
+
+        // ===========================================
+        // CÓDIGO DEL JUEGO (CON NUEVA MECÁNICA DE ÁRBOLES)
+        // ===========================================
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${wsProtocol}//${window.location.host}`;
+        let socket = null;
+        let role = null;
+        let myPlayerIndex = -1;
+        let playerNameConfirmed = false;
+        
+        let players = [];
+        let enemies = [];
+        let bosses = [];
+        let powerups = [];
+        let bullets = [];
+        let forest = []; // Array para los árboles
+        let gameActive = true;
+        let floatingTexts = [];
+        
+        const MAX_PLAYERS = 4;
+        const PLAYER_SIZE = 24;
+        const ENEMY_SIZE = 20;
+        const BOSS_SIZE = 40;
+        const CANVAS_SIZE = 800;
+        const TREE_COUNT = 10;
+        const TREE_REGEN_TIME = 300; // 10 segundos a 30fps
+        const TREE_MAX_HEALTH = 50; // Salud del árbol, para que no se talen de un solo golpe
+        const SPAWN_POINTS = [
+            {x: 200, y: 200},
+            {x: 600, y: 200},
+            {x: 200, y: 600},
+            {x: 600, y: 600}
+        ];
+        
+        // Colores de jugadores (paleta selvática)
+        const playerColors = ['#8bc34a', '#ff9800', '#ff5722', '#795548'];
+        
+        const playerDesigns = [
+            { color: '#8bc34a', eyeColor: '#ffffff', furColor: '#6a994e', noseColor: '#bc6c25', earColor: '#a7c957', accessory: '#f2e8cf' }, // Zorro/Zarigüeya
+            { color: '#ff9800', eyeColor: '#ffffff', furColor: '#d4740c', noseColor: '#77450e', earColor: '#f5b342', accessory: '#f2e8cf' }, // Ardilla
+            { color: '#ff5722', eyeColor: '#ffffff', furColor: '#bf4d1a', noseColor: '#4f2d0f', earColor: '#e3602a', accessory: '#f2e8cf' }, // Venado
+            { color: '#795548', eyeColor: '#ffffff', furColor: '#5d4037', noseColor: '#3e2723', earColor: '#8d6e63', accessory: '#f2e8cf' } // Oso
+        ];
+
+        const defaultNames = ['ZORRO', 'ARDI', 'VENADO', 'OSO'];
+
+        let totalScore = 0;
+        let totalPowerupsCollected = 0;
+        let bossSpawnThreshold = 2000;
+        let bossActive = false;
+
+        // Función para resetear el juego (Game Over)
+        function gameOver() {
+            document.getElementById('gameOverlay').style.display = 'flex';
+            gameActive = false;
+            // Opcional: Cerrar conexiones websocket?
+        }
+
+        window.startAsArena = function() {
+            role = 'arena';
+            document.getElementById('roomScreen').style.display = 'none';
+            document.getElementById('arenaView').style.display = 'flex';
+            document.getElementById('gameOverlay').style.display = 'none';
+            gameActive = true;
+            connectWebSocket();
+            initPlayers();
+            initForest();
+            setupArena();
+        };
+
+        window.startAsController = function() {
+            role = 'controller';
+            document.getElementById('roomScreen').style.display = 'none';
+            document.getElementById('gamepadView').style.display = 'flex';
+            document.getElementById('nameInputContainer').style.display = 'block';
+            document.getElementById('waitingMessage').style.display = 'none';
+            document.getElementById('controlsContainer').style.display = 'none';
+            
+            initAudio();
+            connectWebSocket();
+            setupController();
+        };
+
+        function connectWebSocket() {
+            socket = new WebSocket(wsUrl);
+            socket.onopen = () => {
+                document.getElementById('connectionInfo').innerText = '✅ Conectado al claro del bosque';
+                if (role === 'arena') {
+                    socket.send(JSON.stringify({ type: 'register_arena' }));
+                } else {
+                    socket.send(JSON.stringify({ type: 'register_controller' }));
+                }
+            };
+            socket.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    if (role === 'arena') {
+                        handleArenaMessage(data);
+                    } else {
+                        handleControllerMessage(data);
+                    }
+                } catch (e) {}
+            };
+            socket.onclose = () => {
+                document.getElementById('connectionInfo').innerText = '❌ Desconectado - reconectando...';
+                setTimeout(connectWebSocket, 2000);
+            };
+        }
+
+        function handleArenaMessage(data) {
+            if (data.type === 'input' && players[data.playerIndex]) {
+                const p = players[data.playerIndex];
+                if (p.active) {
+                    p.moveX = data.moveX;
+                    p.moveY = data.moveY;
+                    p.shooting = data.shooting;
+                    if (data.playerName) {
+                        p.playerName = data.playerName;
+                    }
+                    if (data.moveX !== 0 || data.moveY !== 0) {
+                        p.walkFrame = (p.walkFrame || 0) + 1;
+                    } else {
+                        p.walkFrame = 0;
+                    }
+                } else {
+                    p.moveX = 0;
+                    p.moveY = 0;
+                    p.shooting = false;
+                }
+            }
+        }
+
+        function handleControllerMessage(data) {
+            if (data.type === 'assigned') {
+                myPlayerIndex = data.playerIndex;
+                document.getElementById('waitingMessage').style.display = 'none';
+                document.getElementById('playerColor').style.background = data.color;
+                document.getElementById('connectionStatus').innerHTML = '✅ DEFENDIENDO EL BOSQUE';
+                if (playerNameConfirmed) {
+                    document.getElementById('nameInputContainer').style.display = 'none';
+                    document.getElementById('controlsContainer').style.display = 'block';
+                }
+            }
+            if (data.type === 'game_state' && myPlayerIndex >= 0) {
+                const myPlayer = data.players[myPlayerIndex];
+                if (myPlayer) {
+                    updateGamepadUI(myPlayer);
+                }
+            }
+        }
+
+        function initPlayers() {
+            players = [];
+            for (let i = 0; i < MAX_PLAYERS; i++) {
+                players.push({
+                    index: i,
+                    x: SPAWN_POINTS[i].x,
+                    y: SPAWN_POINTS[i].y,
+                    size: PLAYER_SIZE,
+                    design: playerDesigns[i],
+                    hp: 100,
+                    maxHp: 100,
+                    angle: 0,
+                    shootCooldown: 0,
+                    baseSpeed: 3.5,
+                    speed: 3.5,
+                    powerUp: null,
+                    powerUpTime: 0,
+                    shield: false,
+                    active: true,
+                    connected: false,
+                    moveX: 0,
+                    moveY: 0,
+                    shooting: false,
+                    score: 0,
+                    kills: 0,
+                    level: 1,
+                    powerLevel: 1,
+                    deaths: 0,
+                    walkFrame: 0,
+                    idleFrame: 0,
+                    blinkTimer: 0,
+                    explosiveBullets: false,
+                    multiShot: false,
+                    rapidFire: false,
+                    circleShot: false,
+                    playerName: defaultNames[i],
+                    lives: 10,
+                    respawnTimer: 0,
+                    // Para la regeneración de árboles
+                    regenTreeIndex: -1,
+                    regenTimer: 0
+                });
+            }
+        }
+
+        // NUEVO: Inicializar el bosque
+        function initForest() {
+            forest = [];
+            for (let i = 0; i < TREE_COUNT; i++) {
+                let placed = false;
+                let attempts = 0;
+                let x, y;
+                while (!placed && attempts < 1000) {
+                    x = 50 + Math.random() * (CANVAS_SIZE - 100);
+                    y = 50 + Math.random() * (CANVAS_SIZE - 100);
+                    // Evitar que aparezca justo encima de los puntos de spawn
+                    let tooCloseToSpawn = SPAWN_POINTS.some(sp => Math.hypot(sp.x - x, sp.y - y) < 80);
+                    if (!tooCloseToSpawn) {
+                        placed = true;
+                    }
+                    attempts++;
+                }
+                forest.push({
+                    index: i,
+                    x: x,
+                    y: y,
+                    size: 30,
+                    state: 'standing', // 'standing', 'cutDown', 'regenerating'
+                    health: TREE_MAX_HEALTH,
+                    maxHealth: TREE_MAX_HEALTH,
+                    regenTimer: 0,
+                    beingRegeneratedBy: null
+                });
+            }
+        }
+
+        class Enemy {
+            constructor(level = 1) {
+                this.size = ENEMY_SIZE;
+                this.x = Math.random() * CANVAS_SIZE;
+                this.y = Math.random() * CANVAS_SIZE;
+                this.hp = 40 + (level * 10);
+                this.maxHp = this.hp;
+                this.speed = 1.2 + (level * 0.1);
+                this.damage = 15 + (level * 2);
+                this.level = level;
+                this.color = `hsl(${Math.random() * 40 + 20}, 90%, 40%)`; // Marrones
+                this.pointsValue = 100 * level;
+                this.state = 'patrol';
+                this.patrolTimer = 0;
+                this.patrolDirection = Math.random() * Math.PI * 2;
+                this.stunTimer = 0;
+                this.detectionRange = 150;
+                // Nuevo: para talar árboles
+                this.cutCooldown = 0;
+            }
+            update(players, forest) {
+                if (this.stunTimer > 0) {
+                    this.stunTimer--;
+                    this.state = 'stunned';
+                    return;
+                }
+                if (this.cutCooldown > 0) {
+                    this.cutCooldown--;
+                }
+
+                // Prioridad 1: Atacar árboles cercanos si están en pie
+                let targetTree = null;
+                let closestTreeDist = Infinity;
+                for (let tree of forest) {
+                    if (tree.state === 'standing') {
+                        const dist = Math.hypot(tree.x - this.x, tree.y - this.y);
+                        if (dist < closestTreeDist) {
+                            closestTreeDist = dist;
+                            targetTree = tree;
+                        }
+                    }
+                }
+
+                // Prioridad 2: Si no hay árboles cerca o ya está atacando uno, perseguir jugadores
+                let closestPlayer = null;
+                let closestDist = Infinity;
+                for (let p of players) {
+                    if (!p.active || p.respawnTimer > 0) continue;
+                    const dist = Math.hypot(p.x - this.x, p.y - this.y);
+                    if (dist < closestDist) {
+                        closestDist = dist;
+                        closestPlayer = p;
+                    }
+                }
+
+                // Decidir objetivo: si hay un árbol muy cerca (< 100px) y el enemigo no está en cooldown, ir a talarlo
+                if (targetTree && closestTreeDist < 100 && this.cutCooldown === 0) {
+                    this.state = 'chase';
+                    const dx = targetTree.x - this.x;
+                    const dy = targetTree.y - this.y;
+                    const angle = Math.atan2(dy, dx);
+                    this.x += Math.cos(angle) * this.speed;
+                    this.y += Math.sin(angle) * this.speed;
+                    
+                    // Si toca el árbol, lo daña
+                    if (Math.hypot(this.x - targetTree.x, this.y - targetTree.y) < this.size + targetTree.size) {
+                        targetTree.health -= 5; // Daño al árbol
+                        this.cutCooldown = 15; // Pequeño cooldown para no talarlo de golpe
+                        if (targetTree.health <= 0) {
+                            targetTree.state = 'cutDown';
+                            targetTree.health = 0;
+                            playTreeCutSound();
+                            createGlitchEffect('treeCut', targetTree.x, targetTree.y);
+                        }
+                    }
+                } else if (closestPlayer && closestDist < this.detectionRange) {
+                    this.state = 'chase';
+                    const dx = closestPlayer.x - this.x;
+                    const dy = closestPlayer.y - this.y;
+                    const angle = Math.atan2(dy, dx);
+                    this.x += Math.cos(angle) * this.speed;
+                    this.y += Math.sin(angle) * this.speed;
+                } else {
+                    this.state = 'patrol';
+                    this.patrolTimer--;
+                    if (this.patrolTimer <= 0) {
+                        this.patrolDirection = Math.random() * Math.PI * 2;
+                        this.patrolTimer = 60 + Math.random() * 60;
+                    }
+                    this.x += Math.cos(this.patrolDirection) * this.speed * 0.7;
+                    this.y += Math.sin(this.patrolDirection) * this.speed * 0.7;
+                }
+                this.x = Math.max(this.size, Math.min(CANVAS_SIZE - this.size, this.x));
+                this.y = Math.max(this.size, Math.min(CANVAS_SIZE - this.size, this.y));
+            }
+            stun() {
+                this.stunTimer = 30;
+                this.state = 'stunned';
+            }
+        }
+
+        class Boss {
+            constructor(level = 5) {
+                this.size = BOSS_SIZE;
+                this.x = CANVAS_SIZE / 2;
+                this.y = CANVAS_SIZE / 2;
+                this.hp = 500 + (level * 100);
+                this.maxHp = this.hp;
+                this.speed = 1.5;
+                this.damage = 30;
+                this.level = level;
+                this.color = '#bf4d1a'; // Naranja quemado
+                this.pointsValue = 2000;
+                this.state = 'active';
+                this.attackTimer = 0;
+                this.attackCooldown = 60;
+                this.projectiles = [];
+            }
+            update(players, forest) {
+                let targetX = 0, targetY = 0, count = 0;
+                for (let p of players) {
+                    if (p.active && p.respawnTimer === 0) {
+                        targetX += p.x;
+                        targetY += p.y;
+                        count++;
+                    }
+                }
+                if (count > 0) {
+                    targetX /= count;
+                    targetY /= count;
+                    const dx = targetX - this.x;
+                    const dy = targetY - this.y;
+                    const dist = Math.hypot(dx, dy);
+                    if (dist > 5) {
+                        this.x += (dx / dist) * this.speed;
+                        this.y += (dy / dist) * this.speed;
+                    }
+                }
+
+                // El jefe también tala árboles, pero más rápido
+                for (let tree of forest) {
+                    if (tree.state === 'standing' && Math.hypot(this.x - tree.x, this.y - tree.y) < this.size + tree.size) {
+                        tree.health -= 10;
+                        if (tree.health <= 0) {
+                            tree.state = 'cutDown';
+                            tree.health = 0;
+                            playTreeCutSound();
+                            createGlitchEffect('treeCut', tree.x, tree.y);
+                        }
+                    }
+                }
+
+                this.attackTimer--;
+                if (this.attackTimer <= 0) {
+                    for (let p of players) {
+                        if (p.active && p.respawnTimer === 0) {
+                            const dx = p.x - this.x;
+                            const dy = p.y - this.y;
+                            const angle = Math.atan2(dy, dx);
+                            this.projectiles.push({
+                                x: this.x, y: this.y,
+                                vx: Math.cos(angle) * 4,
+                                vy: Math.sin(angle) * 4,
+                                size: 10,
+                                damage: 20
+                            });
+                        }
+                    }
+                    this.attackTimer = this.attackCooldown;
+                }
+                for (let i = this.projectiles.length-1; i>=0; i--) {
+                    let p = this.projectiles[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    if (p.x < 0 || p.x > CANVAS_SIZE || p.y < 0 || p.y > CANVAS_SIZE) {
+                        this.projectiles.splice(i,1);
+                        continue;
+                    }
+                    for (let player of players) {
+                        if (!player.active || player.respawnTimer > 0) continue;
+                        if (Math.hypot(p.x - player.x, p.y - player.y) < p.size + player.size) {
+                            player.hp -= p.damage;
+                            createGlitchEffect('playerDamage', player.x, player.y);
+                            if (player.hp <= 0) {
+                                player.lives--;
+                                createGlitchEffect('kill', player.x, player.y);
+                                if (player.lives > 0) {
+                                    player.hp = player.maxHp;
+                                    player.x = SPAWN_POINTS[player.index].x;
+                                    player.y = SPAWN_POINTS[player.index].y;
+                                    player.powerLevel = Math.max(1, Math.floor(player.powerLevel * 0.5));
+                                } else {
+                                    player.active = false;
+                                    player.respawnTimer = 300;
+                                    player.hp = 0;
+                                    player.x = SPAWN_POINTS[player.index].x;
+                                    player.y = SPAWN_POINTS[player.index].y;
+                                }
+                            }
+                            this.projectiles.splice(i,1);
+                            break;
+                        }
+                    }
+                }
+                this.x = Math.max(this.size, Math.min(CANVAS_SIZE - this.size, this.x));
+                this.y = Math.max(this.size, Math.min(CANVAS_SIZE - this.size, this.y));
+            }
+        }
+
+        class PowerUp {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = 15;
+                const types = [
+                    { name: 'rapid', color: '#8bc34a', duration: 300, effect: '🌱 BROTES RÁPIDOS', icon: '🌱' },
+                    { name: 'shield', color: '#795548', duration: 300, effect: '🛡️ CORTEZA', icon: '🛡️' },
+                    { name: 'damage', color: '#ff5722', duration: 0, effect: '⬆️ GARRA +1', icon: '⬆️' },
+                    { name: 'speed', color: '#ff9800', duration: 0, effect: '🏃 VELOCIDAD +1', icon: '🏃' },
+                    { name: 'health', color: '#f2e8cf', duration: 0, effect: '❤️ +30 VIDA', icon: '❤️' },
+                    { name: 'explosive', color: '#d32f2f', duration: 240, effect: '💥 EXPLOSIVO', icon: '💥' },
+                    { name: 'multishot', color: '#6a994e', duration: 240, effect: '🎯 MULTI-GARRA', icon: '🎯' },
+                    { name: 'circle', color: '#bc6c25', duration: 180, effect: '⭕ CIRCULAR', icon: '⭕' }
+                ];
+                this.type = types[Math.floor(Math.random() * types.length)];
+                this.color = this.type.color;
+                this.duration = this.type.duration;
+                this.name = this.type.name;
+                this.effect = this.type.effect;
+                this.icon = this.type.icon;
+            }
+        }
+
+        function createGlitchEffect(type, x, y) {
+            const overlay = document.getElementById('glitchOverlay');
+            if (overlay) {
+                overlay.style.opacity = '0.3';
+                setTimeout(() => { overlay.style.opacity = '0'; }, 200);
+            }
+            if (x && y) {
+                floatingTexts.push({
+                    x, y,
+                    text: type === 'damage' ? '💥' :
+                          type === 'powerup' ? '✨' :
+                          type === 'kill' ? '+100' :
+                          type === 'treeCut' ? '🌲' : '🌿',
+                    color: type === 'damage' ? '#ff5722' :
+                           type === 'powerup' ? '#8bc34a' :
+                           type === 'treeCut' ? '#795548' : '#ff9800',
+                    life: 30
+                });
+            }
+
+            if (type === 'damage') {
+                playHitSound();
+            } else if (type === 'powerup') {
+                playPowerUpSound();
+            }
+        }
+
+        function showBossAlert() {
+            const alert = document.createElement('div');
+            alert.className = 'boss-alert';
+            alert.innerText = '👾 MEGA-TALADOR 👾';
+            document.getElementById('arenaView').appendChild(alert);
+            setTimeout(() => alert.remove(), 2000);
+            playBossSound();
+        }
+
+        function setupArena() {
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.imageSmoothingEnabled = false;
+
+            setInterval(() => {
+                if (!gameActive) return;
+                if (enemies.length < 15) {
+                    for (let i = 0; i < 3; i++) {
+                        enemies.push(new Enemy(Math.floor(Math.random() * 3) + 1));
+                    }
+                }
+            }, 2000);
+
+            setInterval(() => {
+                if (!gameActive) return;
+                if (powerups.length < 8) {
+                    for (let i = 0; i < 2; i++) {
+                        powerups.push(new PowerUp(
+                            Math.random() * 700 + 50,
+                            Math.random() * 700 + 50
+                        ));
+                    }
+                }
+            }, 3000);
+
+            setInterval(() => {
+                if (!gameActive) return;
+                if (!bossActive && totalScore >= bossSpawnThreshold) {
+                    bossActive = true;
+                    bosses.push(new Boss(5));
+                    showBossAlert();
+                    bossSpawnThreshold += 5000;
+                    document.getElementById('bossStatus').innerHTML = '🔴 MEGA-TALADOR ACTIVO';
+                }
+            }, 1000);
+
+            function gameLoop() {
+                if (!gameActive) return;
+                updateGame();
+                drawGame(ctx);
+                const state = {
+                    type: 'game_state',
+                    players: players.map(p => ({
+                        hp: p.hp,
+                        maxHp: p.maxHp,
+                        connected: p.connected,
+                        index: p.index,
+                        color: p.design.color,
+                        score: p.score,
+                        level: p.level,
+                        kills: p.kills,
+                        powerLevel: p.powerLevel,
+                        powerUp: p.powerUp,
+                        powerUpTime: p.powerUpTime,
+                        shield: p.shield,
+                        playerName: p.playerName,
+                        lives: p.lives,
+                        respawnTimer: p.respawnTimer,
+                        active: p.active,
+                        regenTreeIndex: p.regenTreeIndex,
+                        regenTimer: p.regenTimer
+                    })),
+                    forest: forest.map(t => ({
+                        state: t.state,
+                        health: t.health,
+                        maxHealth: t.maxHealth,
+                        regenTimer: t.regenTimer,
+                        beingRegeneratedBy: t.beingRegeneratedBy
+                    }))
+                };
+                if (socket && socket.readyState === WebSocket.OPEN) {
+                    socket.send(JSON.stringify(state));
+                }
+                requestAnimationFrame(gameLoop);
+            }
+
+            function updateGame() {
+                // Gestionar respawn de jugadores
+                for (let p of players) {
+                    if (p.respawnTimer > 0) {
+                        p.respawnTimer--;
+                        if (p.respawnTimer <= 0) {
+                            p.lives = 10;
+                            p.hp = p.maxHp;
+                            p.active = true;
+                            p.x = SPAWN_POINTS[p.index].x;
+                            p.y = SPAWN_POINTS[p.index].y;
+                            p.respawnTimer = 0;
+                        }
+                    }
+                }
+
+                // Gestionar regeneración de árboles
+                for (let tree of forest) {
+                    if (tree.state === 'regenerating') {
+                        tree.regenTimer--;
+                        if (tree.regenTimer <= 0) {
+                            tree.state = 'standing';
+                            tree.health = tree.maxHealth;
+                            tree.beingRegeneratedBy = null;
+                            playTreeRegenSound();
+                        }
+                    }
+                }
+
+                // Procesar inputs de jugadores y su interacción con árboles talados
+                for (let p of players) {
+                    if (!p.active || p.respawnTimer > 0) continue;
+
+                    if (p.moveX !== 0 || p.moveY !== 0) {
+                        p.x += (p.moveX || 0) * p.speed;
+                        p.y += (p.moveY || 0) * p.speed;
+                        p.walkFrame = (p.walkFrame || 0) + 1;
+                        p.idleFrame = 0;
+                    } else {
+                        p.walkFrame = 0;
+                        p.idleFrame = (p.idleFrame || 0) + 1;
+                        p.blinkTimer--;
+                        if (p.blinkTimer <= 0) {
+                            p.blinkTimer = 120 + Math.random() * 60;
+                        }
+                    }
+                    
+                    p.x = Math.max(p.size, Math.min(CANVAS_SIZE - p.size, p.x));
+                    p.y = Math.max(p.size, Math.min(CANVAS_SIZE - p.size, p.y));
+
+                    // Interacción con árboles (regenerar)
+                    let interactingWithTree = false;
+                    for (let tree of forest) {
+                        if (tree.state === 'cutDown') {
+                            const dist = Math.hypot(p.x - tree.x, p.y - tree.y);
+                            if (dist < p.size + tree.size) {
+                                interactingWithTree = true;
+                                if (p.regenTreeIndex === tree.index) {
+                                    // Ya está regenerando este árbol
+                                    p.regenTimer++;
+                                    if (p.regenTimer >= TREE_REGEN_TIME) {
+                                        tree.state = 'regenerating';
+                                        tree.regenTimer = 60; // Tiempo de animación de regeneración
+                                        tree.beingRegeneratedBy = p.index;
+                                        p.regenTreeIndex = -1;
+                                        p.regenTimer = 0;
+                                    }
+                                } else if (p.regenTreeIndex === -1) {
+                                    // Comenzar a regenerar este árbol
+                                    p.regenTreeIndex = tree.index;
+                                    p.regenTimer = 1;
+                                }
+                            }
+                        }
+                    }
+                    if (!interactingWithTree) {
+                        p.regenTreeIndex = -1;
+                        p.regenTimer = 0;
+                    }
+
+                    // Disparos (igual que antes)
+                    let closestEnemy = null;
+                    let closestDist = Infinity;
+                    for (let b of bosses) {
+                        const dist = Math.hypot(b.x - p.x, b.y - p.y);
+                        if (dist < closestDist) {
+                            closestDist = dist;
+                            closestEnemy = b;
+                        }
+                    }
+                    for (let e of enemies) {
+                        const dist = Math.hypot(e.x - p.x, e.y - p.y);
+                        if (dist < closestDist) {
+                            closestDist = dist;
+                            closestEnemy = e;
+                        }
+                    }
+                    
+                    if (closestEnemy && closestDist < 300) {
+                        p.angle = Math.atan2(closestEnemy.y - p.y, closestEnemy.x - p.x);
+                    } else if (p.moveX !== 0 || p.moveY !== 0) {
+                        p.angle = Math.atan2(p.moveY, p.moveX);
+                    }
+
+                    if (p.shootCooldown <= 0) {
+                        if (p.shooting) {
+                            const baseDamage = 15 + (p.powerLevel * 5);
+                            const bulletSize = 5 + (p.powerLevel * 3);
+                            const bulletSpeed = 5 + (p.powerLevel * 0.5);
+                            
+                            if (p.powerUp === 'circle' || p.circleShot) {
+                                for (let i = 0; i < 8; i++) {
+                                    const angle = (i * Math.PI / 4);
+                                    bullets.push(createBullet(p, angle, baseDamage, bulletSize, bulletSpeed));
+                                }
+                            } else if (p.powerUp === 'multishot' || p.multiShot) {
+                                for (let i = -1; i <= 1; i++) {
+                                    bullets.push(createBullet(p, p.angle + (i * 0.2), baseDamage, bulletSize, bulletSpeed));
+                                }
+                            } else if (p.powerUp === 'explosive' || p.explosiveBullets) {
+                                bullets.push({
+                                    ...createBullet(p, p.angle, baseDamage * 1.5, bulletSize + 5, bulletSpeed * 0.8),
+                                    explosive: true
+                                });
+                            } else {
+                                const bulletCount = Math.min(p.powerLevel, 4);
+                                for (let i = 0; i < bulletCount; i++) {
+                                    let angle = p.angle;
+                                    if (bulletCount > 1) {
+                                        angle += (i - (bulletCount-1)/2) * 0.15;
+                                    }
+                                    bullets.push(createBullet(p, angle, baseDamage, bulletSize, bulletSpeed));
+                                }
+                            }
+                            
+                            p.shootCooldown = (p.powerUp === 'rapid' || p.rapidFire) ? 8 : 15;
+                            playShootSound();
+                        }
+                    } else {
+                        p.shootCooldown--;
+                    }
+
+                    if (p.powerUpTime > 0) {
+                        p.powerUpTime--;
+                        if (p.powerUp === 'shield') p.shield = true;
+                        if (p.powerUp === 'rapid') p.rapidFire = true;
+                        if (p.powerUp === 'explosive') p.explosiveBullets = true;
+                        if (p.powerUp === 'multishot') p.multiShot = true;
+                        if (p.powerUp === 'circle') p.circleShot = true;
+                    } else {
+                        p.powerUp = null;
+                        p.shield = false;
+                        p.rapidFire = false;
+                        p.explosiveBullets = false;
+                        p.multiShot = false;
+                        p.circleShot = false;
+                    }
+                }
+
+                function createBullet(player, angle, damage, size, speed) {
+                    return {
+                        x: player.x, y: player.y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        owner: player.index,
+                        size: size,
+                        damage: damage,
+                        explosive: false
+                    };
+                }
+
+                // Actualizar enemigos (pasándoles el bosque)
+                for (let e of enemies) {
+                    e.update(players, forest);
+                }
+
+                // Actualizar jefes
+                for (let b of bosses) {
+                    b.update(players, forest);
+                }
+
+                // Colisiones de balas con enemigos (sin cambios, pero las balas también podrían dañar árboles? No, por ahora no)
+                for (let i = bullets.length-1; i>=0; i--) {
+                    let b = bullets[i];
+                    b.x += b.vx;
+                    b.y += b.vy;
+                    
+                    if (b.x < 0 || b.x > CANVAS_SIZE || b.y < 0 || b.y > CANVAS_SIZE) {
+                        bullets.splice(i,1);
+                        continue;
+                    }
+                    
+                    for (let j=enemies.length-1; j>=0; j--) {
+                        let e = enemies[j];
+                        if (Math.hypot(b.x - e.x, b.y - e.y) < e.size + b.size) {
+                            e.hp -= b.damage;
+                            e.stun();
+                            createGlitchEffect('damage', e.x, e.y);
+                            
+                            if (b.explosive) {
+                                for (let k=enemies.length-1; k>=0; k--) {
+                                    let other = enemies[k];
+                                    if (k !== j && Math.hypot(other.x - e.x, other.y - e.y) < 60) {
+                                        other.hp -= b.damage / 2;
+                                        other.stun();
+                                    }
+                                }
+                            }
+                            
+                            bullets.splice(i,1);
+                            
+                            if (e.hp <= 0) {
+                                if (players[b.owner]) {
+                                    players[b.owner].score += e.pointsValue;
+                                    players[b.owner].kills++;
+                                    totalScore += e.pointsValue;
+                                    createGlitchEffect('kill', e.x, e.y);
+                                    
+                                    if (players[b.owner].score > players[b.owner].level * 800) {
+                                        players[b.owner].level++;
+                                        players[b.owner].powerLevel = Math.min(4, players[b.owner].powerLevel + 1);
+                                    }
+                                }
+                                enemies.splice(j,1);
+                            }
+                            break;
+                        }
+                    }
+                    
+                    for (let j=bosses.length-1; j>=0; j--) {
+                        let bObj = bosses[j];
+                        if (Math.hypot(b.x - bObj.x, b.y - bObj.y) < bObj.size + b.size) {
+                            bObj.hp -= b.damage;
+                            createGlitchEffect('damage', bObj.x, bObj.y);
+                            bullets.splice(i,1);
+                            
+                            if (bObj.hp <= 0) {
+                                if (players[b.owner]) {
+                                    players[b.owner].score += bObj.pointsValue;
+                                    players[b.owner].kills += 5;
+                                    totalScore += bObj.pointsValue;
+                                    createGlitchEffect('kill', bObj.x, bObj.y);
+                                }
+                                bosses.splice(j,1);
+                                bossActive = false;
+                                document.getElementById('bossStatus').innerHTML = '🟢';
+                            }
+                            break;
+                        }
+                    }
+                }
+
+                // Colisiones enemigo-jugador (daño)
+                for (let e of enemies) {
+                    for (let p of players) {
+                        if (!p.active || p.respawnTimer > 0) continue;
+                        const dist = Math.hypot(p.x - e.x, p.y - e.y);
+                        if (dist < e.size + p.size && !p.shield && e.state !== 'stunned') {
+                            p.hp -= e.damage;
+                            e.stun();
+                            createGlitchEffect('playerDamage', p.x, p.y);
+                            
+                            if (p.hp <= 0) {
+                                p.lives--;
+                                createGlitchEffect('kill', p.x, p.y);
+                                if (p.lives > 0) {
+                                    p.hp = p.maxHp;
+                                    p.x = SPAWN_POINTS[p.index].x;
+                                    p.y = SPAWN_POINTS[p.index].y;
+                                    p.powerLevel = Math.max(1, Math.floor(p.powerLevel * 0.5));
+                                } else {
+                                    p.active = false;
+                                    p.respawnTimer = 300;
+                                    p.hp = 0;
+                                    p.x = SPAWN_POINTS[p.index].x;
+                                    p.y = SPAWN_POINTS[p.index].y;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Power-ups (sin cambios)
+                for (let i=powerups.length-1; i>=0; i--) {
+                    let pu = powerups[i];
+                    for (let p of players) {
+                        if (!p.active || p.respawnTimer > 0) continue;
+                        if (Math.hypot(pu.x - p.x, pu.y - p.y) < pu.size + p.size) {
+                            
+                            createGlitchEffect('powerup', pu.x, pu.y);
+                            
+                            if (pu.name === 'health') {
+                                p.hp = Math.min(p.maxHp, p.hp + 30);
+                            } else if (pu.name === 'damage') {
+                                p.powerLevel = Math.min(4, p.powerLevel + 1);
+                            } else if (pu.name === 'speed') {
+                                p.speed = p.baseSpeed + 1.5;
+                                p.baseSpeed = p.speed;
+                            } else {
+                                p.powerUp = pu.name;
+                                p.powerUpTime = pu.duration;
+                            }
+                            
+                            totalPowerupsCollected++;
+                            powerups.splice(i,1);
+                            break;
+                        }
+                    }
+                }
+
+                floatingTexts = floatingTexts.filter(t => {
+                    t.life--;
+                    return t.life > 0;
+                });
+
+                // --- NUEVA CONDICIÓN DE DERROTA ---
+                const cutDownTrees = forest.filter(t => t.state === 'cutDown').length;
+                if (cutDownTrees === TREE_COUNT) {
+                    gameOver();
+                }
+
+                updatePlayerCount();
+                document.getElementById('totalScore').innerText = totalScore;
+                document.getElementById('totalPowerups').innerText = totalPowerupsCollected;
+                document.getElementById('treesStanding').innerHTML = `${TREE_COUNT - cutDownTrees}/${TREE_COUNT}`;
+            }
+
+            function drawGame(ctx) {
+                ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+                
+                // Fondo (suelo del bosque)
+                const gradient = ctx.createLinearGradient(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+                gradient.addColorStop(0, '#2b4b2b');
+                gradient.addColorStop(1, '#1d3b1d');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+
+                // Líneas de cuadrícula (como hojas o sombras)
+                ctx.strokeStyle = '#8bc34a22';
+                ctx.lineWidth = 2;
+                for (let i=0; i<CANVAS_SIZE; i+=40) {
+                    if (Math.random() < 0.02) {
+                        ctx.strokeStyle = '#ff980044';
+                    }
+                    ctx.beginPath();
+                    ctx.moveTo(i, 0);
+                    ctx.lineTo(i, CANVAS_SIZE);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(0, i);
+                    ctx.lineTo(CANVAS_SIZE, i);
+                    ctx.stroke();
+                }
+
+                // Spawn points (madrigueras)
+                ctx.strokeStyle = '#8bc34a';
+                ctx.lineWidth = 3;
+                ctx.setLineDash([5, 5]);
+                SPAWN_POINTS.forEach(point => {
+                    ctx.beginPath();
+                    ctx.arc(point.x, point.y, 30, 0, Math.PI * 2);
+                    ctx.stroke();
+                });
+                ctx.setLineDash([]);
+
+                // Dibujar ÁRBOLES
+                forest.forEach(tree => {
+                    if (tree.state === 'standing') {
+                        // Tronco
+                        ctx.fillStyle = '#8d6e63';
+                        ctx.fillRect(tree.x - 10, tree.y - 15, 20, 30);
+                        // Copa
+                        ctx.fillStyle = '#2e7d32';
+                        ctx.beginPath();
+                        ctx.arc(tree.x, tree.y - 30, 20, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.fillStyle = '#388e3c';
+                        ctx.beginPath();
+                        ctx.arc(tree.x - 8, tree.y - 40, 12, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.beginPath();
+                        ctx.arc(tree.x + 8, tree.y - 40, 12, 0, Math.PI * 2);
+                        ctx.fill();
+                        // Barra de vida del árbol
+                        const healthPercent = tree.health / tree.maxHealth;
+                        ctx.fillStyle = '#ff0000';
+                        ctx.fillRect(tree.x-20, tree.y-70, 40, 5);
+                        ctx.fillStyle = '#00ff00';
+                        ctx.fillRect(tree.x-20, tree.y-70, 40 * healthPercent, 5);
+                    } else if (tree.state === 'cutDown') {
+                        // Tocón
+                        ctx.fillStyle = '#8d6e63';
+                        ctx.fillRect(tree.x - 12, tree.y - 10, 24, 20);
+                        ctx.fillStyle = '#5d4037';
+                        ctx.beginPath();
+                        ctx.arc(tree.x, tree.y - 10, 10, 0, Math.PI);
+                        ctx.fill();
+                        // Icono de talado
+                        ctx.fillStyle = '#ff5722';
+                        ctx.font = "bold 24px 'Courier New'";
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText('🌳', tree.x, tree.y - 25);
+                    } else if (tree.state === 'regenerating') {
+                        // Tocón con brotes
+                        ctx.fillStyle = '#8d6e63';
+                        ctx.fillRect(tree.x - 12, tree.y - 10, 24, 20);
+                        ctx.fillStyle = '#5d4037';
+                        ctx.beginPath();
+                        ctx.arc(tree.x, tree.y - 10, 10, 0, Math.PI);
+                        ctx.fill();
+                        // Brotes verdes
+                        ctx.fillStyle = '#8bc34a';
+                        ctx.beginPath();
+                        ctx.arc(tree.x - 5, tree.y - 25, 8, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.beginPath();
+                        ctx.arc(tree.x + 5, tree.y - 30, 8, 0, Math.PI * 2);
+                        ctx.fill();
+                        // Barra de regeneración
+                        const regenPercent = tree.regenTimer / 60;
+                        ctx.fillStyle = '#ff9800';
+                        ctx.fillRect(tree.x-20, tree.y-45, 40, 5);
+                        ctx.fillStyle = '#8bc34a';
+                        ctx.fillRect(tree.x-20, tree.y-45, 40 * regenPercent, 5);
+                    }
+                });
+
+                // Power-ups
+                powerups.forEach(pu => {
+                    ctx.fillStyle = pu.color;
+                    ctx.shadowColor = pu.color;
+                    ctx.shadowBlur = 20;
+                    ctx.fillRect(pu.x - pu.size/2, pu.y - pu.size/2, pu.size, pu.size);
+                    ctx.shadowBlur = 0;
+                    ctx.font = "bold 16px 'Courier New'";
+                    ctx.fillStyle = 'white';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(pu.icon, pu.x, pu.y);
+                });
+
+                // Jefes (MEGA-TALADORES)
+                bosses.forEach(b => {
+                    ctx.shadowBlur = 30;
+                    ctx.shadowColor = '#ff5722';
+                    
+                    ctx.fillStyle = b.color;
+                    ctx.fillRect(b.x - b.size/2, b.y - b.size/2, b.size, b.size);
+                    
+                    ctx.shadowBlur = 0;
+                    // Casco
+                    ctx.fillStyle = '#5d4037';
+                    ctx.fillRect(b.x - 20, b.y - 25, 40, 10);
+                    ctx.fillStyle = '#ff5722';
+                    ctx.fillRect(b.x - 15, b.y - 30, 30, 8);
+                    
+                    // Ojos
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(b.x - 20, b.y - 15, 10, 10);
+                    ctx.fillRect(b.x + 10, b.y - 15, 10, 10);
+                    ctx.fillStyle = 'black';
+                    ctx.fillRect(b.x - 18, b.y - 13, 6, 6);
+                    ctx.fillRect(b.x + 12, b.y - 13, 6, 6);
+                    
+                    // Barra de vida
+                    const healthPercent = b.hp / b.maxHp;
+                    ctx.fillStyle = '#ff0000';
+                    ctx.fillRect(b.x-50, b.y-60, 100, 10);
+                    ctx.fillStyle = '#00ff00';
+                    ctx.fillRect(b.x-50, b.y-60, 100 * healthPercent, 10);
+                    
+                    // Proyectiles (sierras)
+                    ctx.fillStyle = '#ff9800';
+                    b.projectiles.forEach(p => {
+                        ctx.fillRect(p.x - p.size/2, p.y - p.size/2, p.size, p.size);
+                    });
+                });
+
+                // Enemigos (TALADORES)
+                enemies.forEach(e => {
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = '#ff5722';
+                    
+                    ctx.fillStyle = e.color;
+                    ctx.fillRect(e.x - e.size/2, e.y - e.size/2, e.size, e.size);
+                    
+                    ctx.shadowBlur = 0;
+                    // Casco de seguridad
+                    ctx.fillStyle = '#5d4037';
+                    ctx.fillRect(e.x - 12, e.y - 20, 24, 8);
+                    // Sierra
+                    ctx.fillStyle = '#bdbdbd';
+                    ctx.fillRect(e.x + 10, e.y - 8, 8, 8);
+                    
+                    if (e.state === 'stunned') {
+                        ctx.fillStyle = '#ffff00';
+                        ctx.fillRect(e.x - 5, e.y - 25, 10, 8);
+                    }
+                    
+                    // Barra de vida
+                    const healthPercent = e.hp / e.maxHp;
+                    ctx.fillStyle = '#ff0000';
+                    ctx.fillRect(e.x-15, e.y-25, 30, 5);
+                    ctx.fillStyle = '#00ff00';
+                    ctx.fillRect(e.x-15, e.y-25, 30 * healthPercent, 5);
+                    
+                    // Ojos
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(e.x-10, e.y-8, 6, 6);
+                    ctx.fillRect(e.x+4, e.y-8, 6, 6);
+                    
+                    ctx.fillStyle = 'black';
+                    let targetAngle = 0;
+                    let closest = players.find(p => p.active && p.respawnTimer === 0);
+                    if (closest) {
+                        targetAngle = Math.atan2(closest.y - e.y, closest.x - e.x);
+                    }
+                    ctx.fillRect(e.x-8 + Math.cos(targetAngle)*2, e.y-6 + Math.sin(targetAngle)*2, 3, 3);
+                    ctx.fillRect(e.x+6 + Math.cos(targetAngle)*2, e.y-6 + Math.sin(targetAngle)*2, 3, 3);
+                });
+
+                // Jugadores (GUARDIANES - ANIMALES)
+                players.forEach(p => {
+                    if (!p.active || p.respawnTimer > 0) {
+                        if (p.respawnTimer > 0) {
+                            ctx.globalAlpha = 0.6;
+                            ctx.fillStyle = '#d32f2f';
+                            ctx.font = "bold 28px 'Courier New'";
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            ctx.fillText('💀', p.x, p.y - 20);
+                            ctx.font = "bold 14px 'Courier New'";
+                            ctx.fillStyle = '#ff8a80';
+                            ctx.fillText(`${Math.ceil(p.respawnTimer / 30)}s`, p.x, p.y + 10);
+                            ctx.globalAlpha = 1.0;
+                        }
+                        return;
+                    }
+                    
+                    const d = p.design;
+                    
+                    ctx.shadowBlur = 25;
+                    ctx.shadowColor = d.color;
+                    
+                    // Cuerpo (redondeado para animalitos)
+                    ctx.fillStyle = d.color;
+                    ctx.beginPath();
+                    ctx.ellipse(p.x, p.y, p.size/2, p.size/1.8, 0, 0, Math.PI*2);
+                    ctx.fill();
+                    
+                    // Orejas
+                    ctx.fillStyle = d.earColor;
+                    ctx.fillRect(p.x - 18, p.y - 30, 10, 14);
+                    ctx.fillRect(p.x + 8, p.y - 30, 10, 14);
+                    
+                    // Hocico
+                    ctx.fillStyle = d.furColor;
+                    ctx.beginPath();
+                    ctx.ellipse(p.x, p.y + 5, 8, 5, 0, 0, Math.PI*2);
+                    ctx.fill();
+                    
+                    ctx.shadowBlur = 0;
+                    
+                    // Ojos
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(p.x-12, p.y-10, 8, 8);
+                    ctx.fillRect(p.x+4, p.y-10, 8, 8);
+                    
+                    ctx.fillStyle = '#000';
+                    const eyeOffsetX = Math.cos(p.angle) * 2;
+                    const eyeOffsetY = Math.sin(p.angle) * 2;
+                    ctx.fillRect(p.x-10 + eyeOffsetX, p.y-8 + eyeOffsetY, 4, 4);
+                    ctx.fillRect(p.x+6 + eyeOffsetX, p.y-8 + eyeOffsetY, 4, 4);
+                    
+                    // Nariz
+                    ctx.fillStyle = d.noseColor;
+                    ctx.fillRect(p.x-4, p.y, 3, 3);
+                    ctx.fillRect(p.x+1, p.y, 3, 3);
+                    
+                    // Patas
+                    ctx.fillStyle = d.furColor;
+                    if (p.walkFrame > 0) {
+                        const step = Math.sin(p.walkFrame * 0.3) * 4;
+                        ctx.fillRect(p.x-12 + step, p.y+10, 8, 6);
+                        ctx.fillRect(p.x+4 - step, p.y+10, 8, 6);
+                    } else {
+                        ctx.fillRect(p.x-12, p.y+10, 8, 6);
+                        ctx.fillRect(p.x+4, p.y+10, 8, 6);
+                    }
+                    
+                    // Animación idle
+                    if (p.walkFrame === 0) {
+                        const breath = Math.sin(p.idleFrame * 0.05) * 2;
+                        p.y += breath * 0.5;
+                    }
+                    
+                    // Parpadeo
+                    if (p.blinkTimer < 10) {
+                        ctx.fillStyle = d.eyeColor;
+                        ctx.fillRect(p.x-12, p.y-12, 8, 2);
+                        ctx.fillRect(p.x+4, p.y-12, 8, 2);
+                    }
+                    
+                    // Escudo (Corteza)
+                    if (p.shield) {
+                        ctx.shadowBlur = 30;
+                        ctx.shadowColor = '#8bc34a';
+                        ctx.strokeStyle = '#8bc34a';
+                        ctx.lineWidth = 4;
+                        ctx.beginPath();
+                        ctx.ellipse(p.x, p.y, p.size/2 + 6, p.size/1.8 + 6, 0, 0, Math.PI*2);
+                        ctx.stroke();
+                    }
+                    
+                    ctx.shadowBlur = 0;
+                    
+                    // Nombre y nivel
+                    ctx.fillStyle = '#ffb74d';
+                    ctx.font = "bold 12px 'Courier New'";
+                    ctx.textAlign = 'center';
+                    ctx.fillText(p.playerName || defaultNames[p.index], p.x, p.y-55);
+                    
+                    ctx.fillStyle = '#ff9800';
+                    ctx.font = "bold 14px 'Courier New'";
+                    ctx.fillText(`Nv.${p.powerLevel}`, p.x-15, p.y-40);
+                    
+                    ctx.fillStyle = '#ff9800';
+                    ctx.font = "bold 12px 'Courier New'";
+                    ctx.fillText(`❤️ ${p.lives}`, p.x+15, p.y-40);
+                    
+                    // Barra de vida
+                    const hpPercent = p.hp / p.maxHp;
+                    ctx.fillStyle = '#ff0000';
+                    ctx.fillRect(p.x-20, p.y-30, 40, 5);
+                    ctx.fillStyle = '#00ff00';
+                    ctx.fillRect(p.x-20, p.y-30, 40 * hpPercent, 5);
+
+                    // Indicador de regeneración de árbol
+                    if (p.regenTreeIndex !== -1 && p.regenTimer > 0) {
+                        ctx.fillStyle = '#ff9800';
+                        ctx.font = "bold 14px 'Courier New'";
+                        ctx.fillText(`🌱 ${Math.floor(p.regenTimer / 30)}s`, p.x, p.y + 40);
+                    }
+                    
+                    // Conexión
+                    if (p.connected) {
+                        ctx.fillStyle = '#8bc34a';
+                        ctx.fillRect(p.x-25, p.y-25, 8, 8);
+                    }
+                    
+                    // Puntuación
+                    ctx.fillStyle = '#ffff00';
+                    ctx.font = "bold 12px 'Courier New'";
+                    ctx.fillText(`${p.score} pts`, p.x-20, p.y+30);
+                });
+
+                // Balas (semillas o garras)
+                bullets.forEach(b => {
+                    ctx.fillStyle = b.explosive ? '#ff5722' : '#8bc34a';
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = b.explosive ? '#ff5722' : '#8bc34a';
+                    ctx.fillRect(b.x - b.size/2, b.y - b.size/2, b.size, b.size);
+                });
+
+                // Textos flotantes
+                floatingTexts.forEach(t => {
+                    ctx.fillStyle = t.color;
+                    ctx.font = `bold ${20 + (30 - t.life)}px 'Courier New'`;
+                    ctx.globalAlpha = t.life / 30;
+                    ctx.fillText(t.text, t.x, t.y - (30 - t.life));
+                });
+                ctx.globalAlpha = 1;
+                ctx.shadowBlur = 0;
+            }
+
+            gameLoop();
+        }
+
+        function setupController() {
+            const joystickBase = document.getElementById('joystickBase');
+            const joystickThumb = document.getElementById('joystickThumb');
+            
+            let joystickActive = false;
+            let currentMoveX = 0;
+            let currentMoveY = 0;
+            
+            joystickBase.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                joystickActive = true;
+                if (!soundUnlocked && soundEnabled) {
+                    unlockAudio();
+                }
+            });
+
+            joystickBase.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (!joystickActive) return;
+                
+                const touch = e.touches[0];
+                const rect = joystickBase.getBoundingClientRect();
+                const centerX = rect.left + rect.width/2;
+                const centerY = rect.top + rect.height/2;
+                let dx = touch.clientX - centerX;
+                let dy = touch.clientY - centerY;
+                const maxDist = rect.width/2;
+                const dist = Math.hypot(dx, dy);
+                
+                if (dist > maxDist) {
+                    dx = (dx / dist) * maxDist;
+                    dy = (dy / dist) * maxDist;
+                }
+                
+                joystickThumb.style.transform = `translate(${dx}px, ${dy}px)`;
+                currentMoveX = dx / maxDist;
+                currentMoveY = dy / maxDist;
+                sendInput();
+            });
+
+            joystickBase.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                joystickActive = false;
+                joystickThumb.style.transform = `translate(0px, 0px)`;
+                currentMoveX = 0;
+                currentMoveY = 0;
+                sendInput();
+            });
+
+            let shooting = false;
+            
+            document.getElementById('actionShoot').addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                shooting = true;
+                if (!soundUnlocked && soundEnabled) {
+                    unlockAudio();
+                }
+                sendInput();
+            });
+            
+            document.getElementById('actionShoot').addEventListener('touchend', (e) => {
+                e.preventDefault();
+                shooting = false;
+                sendInput();
+            });
+
+            document.getElementById('confirmNameBtn').addEventListener('click', (e) => {
+                e.preventDefault();
+                const playerName = document.getElementById('playerNameInput').value.trim() || defaultNames[0];
+                playerNameConfirmed = true;
+                
+                document.getElementById('nameInputContainer').style.display = 'none';
+                document.getElementById('controlsContainer').style.display = 'block';
+                document.getElementById('playerIdText').innerText = playerName;
+                
+                if (myPlayerIndex >= 0 && socket && socket.readyState === WebSocket.OPEN) {
+                    socket.send(JSON.stringify({
+                        type: 'input',
+                        playerIndex: myPlayerIndex,
+                        playerName: playerName,
+                        moveX: 0,
+                        moveY: 0,
+                        shooting: false
+                    }));
+                }
+            });
+            
+            function sendInput() {
+                if (socket && socket.readyState === WebSocket.OPEN && myPlayerIndex >= 0 && playerNameConfirmed) {
+                    const playerName = document.getElementById('playerNameInput').value.trim() || defaultNames[myPlayerIndex];
+                    
+                    socket.send(JSON.stringify({
+                        type: 'input',
+                        playerIndex: myPlayerIndex,
+                        playerName: playerName,
+                        moveX: currentMoveX,
+                        moveY: currentMoveY,
+                        shooting: shooting
+                    }));
+                }
+            }
+        }
+
+        function updateGamepadUI(player) {
+            const healthDots = document.querySelectorAll('.health-dot');
+            const healthPercent = (player.hp || 100) / player.maxHp;
+            const activeDots = Math.ceil(healthPercent * 5);
+            
+            healthDots.forEach((dot, index) => {
+                if (index < activeDots) {
+                    dot.style.background = '#ff9800';
+                    dot.style.boxShadow = '0 0 10px #ff9800';
+                    dot.classList.add('active');
+                } else {
+                    dot.style.background = '#5d4037';
+                    dot.style.boxShadow = 'none';
+                    dot.classList.remove('active');
+                }
+            });
+
+            document.getElementById('playerScore').innerText = player.score || 0;
+            document.getElementById('playerLevel').innerText = player.powerLevel || 1;
+            document.getElementById('playerKills').innerText = player.kills || 0;
+            document.getElementById('playerLives').innerText = player.lives;
+
+            if (player.shield) {
+                document.getElementById('shieldActive').style.display = 'inline-block';
+            } else {
+                document.getElementById('shieldActive').style.display = 'none';
+            }
+
+            const powerupIndicator = document.getElementById('powerupIndicator');
+            const powerupNameElement = document.getElementById('powerupName');
+            const powerupTimerFill = document.getElementById('powerupTimer');
+
+            if (player.powerUp) {
+                powerupNameElement.style.display = 'block';
+                
+                let powerupName = '';
+                switch(player.powerUp) {
+                    case 'rapid': powerupName = '🌱 BROTES RÁPIDOS'; break;
+                    case 'shield': powerupName = '🛡️ CORTEZA'; break;
+                    case 'explosive': powerupName = '💥 EXPLOSIVO'; break;
+                    case 'multishot': powerupName = '🎯 MULTI-GARRA'; break;
+                    case 'circle': powerupName = '⭕ CIRCULAR'; break;
+                    default: powerupName = '✨ ESPÍRITU DEL BOSQUE';
+                }
+                powerupNameElement.innerText = powerupName;
+                
+                const percent = (player.powerUpTime / 300) * 100;
+                powerupTimerFill.style.width = percent + '%';
+                
+                document.getElementById('rapidIndicator').style.display = player.powerUp === 'rapid' ? 'block' : 'none';
+                document.getElementById('bombIndicator').style.display = player.powerUp === 'explosive' ? 'block' : 'none';
+                document.getElementById('circleIndicator').style.display = player.powerUp === 'circle' ? 'block' : 'none';
+            } else {
+                powerupNameElement.style.display = 'none';
+                powerupTimerFill.style.width = '0%';
+                document.getElementById('rapidIndicator').style.display = 'none';
+                document.getElementById('bombIndicator').style.display = 'none';
+                document.getElementById('circleIndicator').style.display = 'none';
+            }
+
+            // NUEVO: Indicador de regeneración de árbol
+            const regenIndicator = document.getElementById('regenIndicator');
+            const regenTimerFill = document.getElementById('regenTimerFill');
+            if (player.regenTimer > 0 && player.regenTreeIndex !== -1) {
+                regenIndicator.style.display = 'flex';
+                const percent = (player.regenTimer / 300) * 100;
+                regenTimerFill.style.width = percent + '%';
+            } else {
+                regenIndicator.style.display = 'none';
+            }
+
+            const respawnIndicator = document.getElementById('respawnIndicator');
+            const respawnTimerFill = document.getElementById('respawnTimerFill');
+            if (player.respawnTimer > 0) {
+                respawnIndicator.style.display = 'flex';
+                const percentRemaining = (player.respawnTimer / 300) * 100;
+                respawnTimerFill.style.width = percentRemaining + '%';
+            } else {
+                respawnIndicator.style.display = 'none';
+            }
+        }
+
+        function updatePlayerCount() {
+            // Función vacía, pero se mantiene para compatibilidad
+        }
+    </script>
+</body>
+</html>
